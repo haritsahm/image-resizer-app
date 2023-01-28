@@ -17,21 +17,20 @@ std::string ImageResizer::encode_image(const cv::Mat &image, const std::string &
     return encoded_img_str;
 }
 
-bool ImageResizer::process(const std::string &encoded_input, std::string &encoded_output)
+Error ImageResizer::process(const std::string &encoded_input, std::string &encoded_output)
 {
     cv::Mat decoded_image;
     try
     {
-
         decoded_image = decode_image(encoded_input);
     }
-    catch (std::runtime_error const &err)
+    catch (const std::runtime_error &err)
     {
-        return false;
+        return Error(Error::Code::FAILED, err.what());
     }
 
     if (decoded_image.empty())
-        return false;
+        return Error(Error::Code::FAILED, "String input is not a valid image encoded data.");
 
     cv::Size mat_size{1280, 720}; // dummy
 
@@ -40,5 +39,5 @@ bool ImageResizer::process(const std::string &encoded_input, std::string &encode
 
     encoded_output = encode_image(resized_image, ".jpg");
 
-    return true;
+    return Error::Success;
 }

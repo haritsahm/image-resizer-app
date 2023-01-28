@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "image_resizer/base64.hpp"
+#include "image_resizer/error.hpp"
 #include "image_resizer/image_resizer.hpp"
 
 // TDD since its functionalities will be private
@@ -75,8 +76,8 @@ TEST(ImageResizerFunc, resizer_class)
     std::string encoded_image_test1 = encode_image(origin_image_test1, ".jpg");
 
     std::string resizer_process_test1;
-    bool res_test1 = image_resizer_obj.process(encoded_image_test1, resizer_process_test1);
-    EXPECT_TRUE(res_test1);
+    Error res_test1 = image_resizer_obj.process(encoded_image_test1, resizer_process_test1);
+    EXPECT_EQ(res_test1, Error::Success);
     EXPECT_EQ(resizer_process_test1, resizer_process_test1);
 
     std::string encoded_image_test2{
@@ -85,8 +86,8 @@ TEST(ImageResizerFunc, resizer_class)
         "GVzIG9iamVjdCB3aXRoIGVuY29kaW5nIChz"
         "dWNoIGFzIEpQRUcgb3IgUE5HIGVuY29kaW5n"};
     std::string resizer_process_test2;
-    bool res_test2 = image_resizer_obj.process(encoded_image_test2, resizer_process_test2);
-    EXPECT_FALSE(res_test2);
+    Error res_test2 = image_resizer_obj.process(encoded_image_test2, resizer_process_test2);
+    EXPECT_EQ(res_test2, Error(Error::Code::FAILED));
     EXPECT_TRUE(resizer_process_test2.empty());
 
     std::string encoded_err_test3{
@@ -100,8 +101,8 @@ TEST(ImageResizerFunc, resizer_class)
         "dGggaW1zYXZlIGFuZCBpbXJlYWQsIGJ1dCBQSU"
         "wgcHJvdmlkZXMgYSBtb3JlIGRpcm?jdCBtZXR$?ob2Q6"};
     std::string resizer_process_test3;
-    bool res_test = image_resizer_obj.process(encoded_err_test3, resizer_process_test3);
-    EXPECT_FALSE(res_test);
+    Error res_test3 = image_resizer_obj.process(encoded_err_test3, resizer_process_test3);
+    EXPECT_EQ(res_test3, Error(Error::Code::FAILED));
     EXPECT_TRUE(resizer_process_test3.empty());
 }
 

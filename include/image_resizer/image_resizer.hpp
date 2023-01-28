@@ -6,6 +6,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "image_resizer/base64.hpp"
+#include "image_resizer/error.hpp"
 
 class ImageResizer
 {
@@ -19,7 +20,7 @@ public:
     ImageResizer(ImageResizer &&obj) = delete;
     ImageResizer &operator=(ImageResizer &&obj);
 
-    bool process(const std::string &encoded_input, std::string &encoded_output);
+    Error process(const std::string &encoded_input, std::string &encoded_output);
 
 private:
     cv::Mat decode_image(const std::string &byte_string);
