@@ -131,10 +131,11 @@ TEST(Base64, invalid_encoded)
 
     std::string rest0_original = "YWJ2Z?GMyMw==";
 
+    EXPECT_THROW(base64_decode(rest0_original), std::runtime_error);
+
     try
     {
         base64_decode(rest0_original);
-        FAIL() << "Expected std::runtime_error";
     }
     catch (std::runtime_error const &err)
     {
