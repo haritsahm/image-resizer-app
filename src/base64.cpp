@@ -25,6 +25,8 @@ static unsigned char pos_char_table(const unsigned char chr)
 
 std::string base64_encode(std::string const &bytes_string)
 {
+    if (bytes_string.empty())
+        return std::string();
 
     int str_length = bytes_string.length();
     int enc_length = (str_length + 2) / 3 * 4;
