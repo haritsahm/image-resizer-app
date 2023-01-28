@@ -17,6 +17,6 @@ jobs:
       run: docker build . --file Dockerfile --tag image-resizer-app
     - name: Run tests
       run: |
-        docker run -e CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} image-resizer-app
-        /bin/bash -c "/workspace/image-resizer-app/tests/run_tests.sh"
+        docker run -e CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} image-resizer-app \
+          /bin/bash -c "/workspace/image-resizer-app/tests/run_tests.sh"
 
