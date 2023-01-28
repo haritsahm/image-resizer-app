@@ -18,5 +18,5 @@ jobs:
     - name: Run tests
       run: |
         docker run -e CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} image-resizer-app \
-          /bin/bash -c "/workspace/image-resizer-app/tests/run_tests.sh"
+          /bin/bash -c "sh /workspace/image-resizer-app/tests/run_tests.sh"
 
