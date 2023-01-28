@@ -22,6 +22,15 @@ RUN apt-get -y update && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
 
+RUN cd /temp/ && \
+    wget -O opencv.zip https://codeload.github.com/opencv/opencv/zip/refs/tags/4.6.0 && \
+    unzip opencv.zip && cd opencv-4.6.0/ && \
+    mkdir -p build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DBUILD_LIST=core,highgui,improc,imgcodecs .. && \
+    make -j$(nproc) && \
+    make install
+
 # Cleanup
 RUN apt-get autoremove -y && \
     apt-get clean -y && \
