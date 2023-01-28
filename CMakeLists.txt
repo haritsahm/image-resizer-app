@@ -34,8 +34,9 @@ include_directories(
     include
 )
 
-add_library(base64
+add_library(common_utils
     src/base64.cpp
+    src/error.cpp
 )
 
 add_library(image_resizer

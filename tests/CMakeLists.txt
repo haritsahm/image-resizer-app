@@ -15,7 +15,7 @@ add_executable(test_basic_base64
 target_link_libraries(test_basic_base64
     PRIVATE
     GTest::GTest
-    base64
+    common_utils
 )
 
 add_executable(test_image_resizer
@@ -25,7 +25,7 @@ add_executable(test_image_resizer
 target_link_libraries(test_image_resizer
     PRIVATE
     GTest::GTest
-    base64
+    common_utils
     image_resizer)
 
 add_test(NAME test_basic_base64 COMMAND $<TARGET_FILE:test_basic_base64>)
