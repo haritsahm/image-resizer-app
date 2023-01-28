@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  # Runt test on main branch
+  push:
+    branches: [ "main" ]
+
+  # Run tests for any PRs.
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build image
+      run: docker build . --file Dockerfile --tag image-resizer-app
+    - name: Run tests
+      run: |
+        docker run -v ${PWD}/coverage:/mnt/coverage image-resizer-app \
+          /bin/bash -c "sh /workspace/image-resizer-app/tests/run_tests.sh"
+    - name: Generate reports
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: coverage/coverage.info
+        fail_ci_if_error: true
+        verbose: true

@@ -15,7 +15,7 @@ RUN apt-get -y update && \
     apt-get -y autoremove && \
     apt-get install -y \
     git wget curl unzip \
-    build-essential gdb clang-format cmake \
+    build-essential gdb clang-format cmake lcov \
     libssl-dev libperlio-gzip-perl libjson-perl \
     libpq-dev libsqlite3-dev && \
     apt-get autoremove -y && \
@@ -36,6 +36,5 @@ COPY src src/
 COPY tests tests/
 COPY CMakeLists.txt ./
 RUN mkdir build && cd build && \
-    cmake .. && make -j$(nproc)
-
-CMD ["/bin/bash"]
+    cmake .. && \
+    make -j$(nproc)
