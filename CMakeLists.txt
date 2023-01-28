@@ -38,6 +38,15 @@ add_library(base64
     src/base64.cpp
 )
 
+add_library(image_resizer
+    src/image_resizer.cpp
+)
+
+if(OpenCV_FOUND)
+    target_include_directories(image_resizer PUBLIC ${OpenCV_INCLUDE_DIR})
+    target_link_libraries(image_resizer ${OpenCV_LIBS})
+endif()
+
 if(RUN_TESTS)
     enable_testing()
     add_subdirectory(tests)
