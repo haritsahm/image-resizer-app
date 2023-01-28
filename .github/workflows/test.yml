@@ -17,6 +17,12 @@ jobs:
       run: docker build . --file Dockerfile --tag image-resizer-app
     - name: Run tests
       run: |
-        docker run -e CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} image-resizer-app \
+        docker run -v ${PWD}/coverage:/mnt/coverage image-resizer-app \
           /bin/bash -c "sh /workspace/image-resizer-app/tests/run_tests.sh"
-
+    - name: Generate reports
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: coverage/coverage.info
+        fail_ci_if_error: true
+        verbose: true
