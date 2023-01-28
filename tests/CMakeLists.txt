@@ -28,5 +28,16 @@ target_link_libraries(test_image_resizer
     common_utils
     image_resizer)
 
+add_executable(test_rapid_json
+    test-rapidjson-parser.cpp
+)
+
+target_link_libraries(test_rapid_json
+    PRIVATE
+    GTest::GTest
+    common_utils)
+target_include_directories(test_rapid_json PRIVATE ${RapidJSON_INCLUDE_DIRS})
+
 add_test(NAME test_basic_base64 COMMAND $<TARGET_FILE:test_basic_base64>)
 add_test(NAME test_image_resizer COMMAND $<TARGET_FILE:test_image_resizer>)
+add_test(NAME test_rapid_json COMMAND $<TARGET_FILE:test_rapid_json>)
