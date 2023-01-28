@@ -36,7 +36,7 @@ TEST(ImageResizerFunc, image_encode_decode)
     cv::Mat comparator_test1;
     cv::bitwise_xor(decoded_image_test1, origin_image_test1, comparator_test1);
 
-    ASSERT_TRUE(cv::countNonZero(comparator_test1.reshape(1)) == 0);
+    EXPECT_TRUE(cv::countNonZero(comparator_test1.reshape(1)) == 0);
 
     cv::Mat origin_image_test2 = cv::Mat::zeros(mat_size, CV_8UC3);
     std::string encoded_image_test2 = encode_image(origin_image_test2, ".png");
@@ -44,9 +44,15 @@ TEST(ImageResizerFunc, image_encode_decode)
     cv::Mat comparator_test2;
     cv::bitwise_xor(decoded_image_test2, origin_image_test2, comparator_test2);
 
-    ASSERT_TRUE(cv::countNonZero(comparator_test2.reshape(1)) == 0);
+    EXPECT_TRUE(cv::countNonZero(comparator_test2.reshape(1)) == 0);
 
-    std::string encoded_string_test3{
+    cv::Mat origin_image_test3 = cv::Mat(mat_size, CV_32FC3);
+    std::string encoded_image_test3 = encode_image(origin_image_test3, ".png");
+    cv::Mat decoded_image_test3 = decode_image(encoded_image_test3);
+
+    EXPECT_TRUE(!decoded_image_test3.empty() && decoded_image_test3.size() == mat_size);
+
+    std::string encoded_string_test4{
         "VGhlIGtleSBwb2ludCBpcyBob3cgdG8gY2"
         "9udmVydCBhIG51bXB5IGFycmF5IHRvIGJ5d"
         "GVzIG9iamVjdCB3aXRoIGVuY29kaW5nIChz"
@@ -56,6 +62,10 @@ TEST(ImageResizerFunc, image_encode_decode)
         "ZpbmcgYW5kIHJlYWRpbmcgdGhlIGltYWdlIHdp"
         "dGggaW1zYXZlIGFuZCBpbXJlYWQsIGJ1dCBQSU"
         "wgcHJvdmlkZXMgYSBtb3JlIGRpcmVjdCBtZXRob2Q6"};
+    cv::Mat decoded_image_test4 = decode_image(encoded_string_test4);
+    EXPECT_TRUE(decoded_image_test4.empty());
+}
+
 TEST(ImageResizerFunc, resizer_class)
 {
     ImageResizer image_resizer_obj;
