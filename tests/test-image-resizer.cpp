@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include "image_resizer/base64.hpp"
+#include "image_resizer/image_resizer.hpp"
 
 // TDD since its functionalities will be private
 cv::Mat decode_image(const std::string &byte_string)
@@ -24,7 +25,7 @@ std::string encode_image(const cv::Mat &image, const std::string &type)
     return encoded_img_str;
 }
 
-TEST(ImageResizer, image_encode_decode)
+TEST(ImageResizerFunc, image_encode_decode)
 {
     // Encode image from zeros, ones, random
     cv::Size mat_size{1280, 720};
@@ -55,6 +56,75 @@ TEST(ImageResizer, image_encode_decode)
         "ZpbmcgYW5kIHJlYWRpbmcgdGhlIGltYWdlIHdp"
         "dGggaW1zYXZlIGFuZCBpbXJlYWQsIGJ1dCBQSU"
         "wgcHJvdmlkZXMgYSBtb3JlIGRpcmVjdCBtZXRob2Q6"};
-    cv::Mat decoded_image_test3 = decode_image(encoded_string_test3);
-    ASSERT_TRUE(decoded_image_test3.empty());
+TEST(ImageResizerFunc, resizer_class)
+{
+    ImageResizer image_resizer_obj;
+    cv::Size mat_size{1280, 720};
+
+    cv::Mat origin_image_test1 = cv::Mat(mat_size, CV_8UC3);
+    std::string encoded_image_test1 = encode_image(origin_image_test1, ".jpg");
+
+    std::string resizer_process_test1;
+    bool res_test1 = image_resizer_obj.process(encoded_image_test1, resizer_process_test1);
+    EXPECT_TRUE(res_test1);
+    EXPECT_EQ(resizer_process_test1, resizer_process_test1);
+
+    std::string encoded_image_test2{
+        "VGhlIGtleSBwb2ludCBpcyBob3cgdG8gY2"
+        "9udmVydCBhIG51bXB5IGFycmF5IHRvIGJ5d"
+        "GVzIG9iamVjdCB3aXRoIGVuY29kaW5nIChz"
+        "dWNoIGFzIEpQRUcgb3IgUE5HIGVuY29kaW5n"};
+    std::string resizer_process_test2;
+    bool res_test2 = image_resizer_obj.process(encoded_image_test2, resizer_process_test2);
+    EXPECT_FALSE(res_test2);
+    EXPECT_TRUE(resizer_process_test2.empty());
+}
+
+TEST(ImageResizerFunc, failed_image_encode)
+{
+    std::string encoded_str_err{
+        "VGhlIGtleSBwb2ludCBpcyBob3cgdG8gY2"
+        "9udmVydCBhIG51bXB5IGFycmF5IHRvIGJ5d"
+        "GVzIG9iamVjdCB3aXRoIGVuY29kaW5nIChz"
+        "dWNoIGFzIEpQRUcgb3IgUE5HIGVuY29kaW5n"
+        "LCBub3QgYmFzZTY0IGVuY29kaW5nKS4gQ2Vyd"
+        "GFpbmx5LCB3ZSBjYW4gZG8gdGhpcyBieSBzYX"
+        "ZpbmcgYW5kIHJlYWRpbmcgdGhlIGltYWdlIHdp"
+        "dGggaW1zYXZlIGFuZCBpbXJlYWQsIGJ1dCBQSU"
+        "wgcHJvdmlkZXMgYSBtb3JlIGRpcmVjdCBtZXR?ob2Q6"};
+    try
+    {
+        cv::Mat decoed_image_test1 = decode_image(encoded_str_err);
+        FAIL() << "Expected std::runtime_error";
+    }
+    catch (std::runtime_error const &err)
+    {
+        EXPECT_EQ(err.what(), std::string("Input is not valid base64-encoded data."));
+    }
+}
+
+TEST(ImageResizerFunc, failed_resizer_class)
+{
+    ImageResizer image_resizer_obj;
+    std::string encoded_str_err{
+        "VGhlIGtleSBwb2ludCBpcyBob3cgdG8gY2"
+        "9udmVydCBhIG51bXB5IGFycmF5IHRvIGJ5d"
+        "GVzIG9iamVjdCB3aXRoIGVuY29kaW5nIChz"
+        "dWNoIGFzIEpQRUcgb3IgUE5HIGVuY29kaW5n"
+        "LCBub3QgYmFzZTY0IGVuY29kaW5nKS4gQ2Vyd"
+        "GFpbmx5LCB3ZSBjYW4gZG8gdGhpcyBieSBzYX"
+        "ZpbmcgYW5kIHJlYWRpbmcgdGhlIGltYWdlIHdp"
+        "dGggaW1zYXZlIGFuZCBpbXJlYWQsIGJ1dCBQSU"
+        "wgcHJvdmlkZXMgYSBtb3JlIGRpcm?jdCBtZXR$?ob2Q6"};
+    std::string resizer_process_test;
+    bool res_test;
+    try
+    {
+        res_test = image_resizer_obj.process(encoded_str_err, resizer_process_test);
+    }
+    catch (std::runtime_error const &err)
+    {
+        EXPECT_EQ(err.what(), std::string("Input is not valid base64-encoded data."));
+        EXPECT_FALSE(res_test);
+    }
 }
