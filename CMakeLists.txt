@@ -11,3 +11,6 @@ add_library(base64
     src/base64.cpp
 )
 
+enable_testing()
+
+add_subdirectory(tests)
