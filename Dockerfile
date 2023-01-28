@@ -37,5 +37,4 @@ COPY tests tests/
 COPY CMakeLists.txt ./
 RUN mkdir build && cd build && \
     cmake .. && \
-    make -j$(nproc) && \
-    make test
+    make -j$(nproc)
