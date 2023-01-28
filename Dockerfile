@@ -36,6 +36,8 @@ COPY src src/
 COPY tests tests/
 COPY CMakeLists.txt ./
 RUN mkdir build && cd build && \
-    cmake .. && make -j$(nproc)
+    cmake .. && \
+    make -j$(nproc) && \
+    make test
 
 CMD ["/bin/bash"]

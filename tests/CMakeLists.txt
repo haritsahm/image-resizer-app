@@ -16,4 +16,4 @@ target_link_libraries(image_resizer_test
     GTest::GTest
     base64)
 
-add_test(image_resizer_gtests image_resizer_test)
+add_test(NAME image_resizer_test COMMAND $<TARGET_FILE:image_resizer_test>)
