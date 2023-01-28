@@ -19,6 +19,8 @@ public:
     ImageResizer(ImageResizer &&obj) = delete;
     ImageResizer &operator=(ImageResizer &&obj);
 
+    bool process(const std::string &encoded_input, std::string &encoded_output);
+
 private:
     cv::Mat decode_image(const std::string &byte_string);
     std::string encode_image(const cv::Mat &image, const std::string &type);
