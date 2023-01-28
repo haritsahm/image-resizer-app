@@ -29,6 +29,7 @@ if(RUN_TESTS)
 endif()
 
 find_package(OpenCV 4 REQUIRED)
+find_package(RapidJSON REQUIRED)
 
 include_directories(
     include
@@ -46,6 +47,10 @@ add_library(image_resizer
 if(OpenCV_FOUND)
     target_include_directories(image_resizer PUBLIC ${OpenCV_INCLUDE_DIR})
     target_link_libraries(image_resizer ${OpenCV_LIBS})
+endif()
+
+if(RapidJSON_FOUND)
+    target_include_directories(image_resizer PUBLIC ${RapidJSON_INCLUDE_DIRS})
 endif()
 
 if(RUN_TESTS)

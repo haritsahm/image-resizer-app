@@ -23,6 +23,11 @@ RUN apt-get -y update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN cd /temp/ && \
+    git clone https://github.com/Tencent/rapidjson.git && cd rapidjson/ && \
+    git submodule update --init && mkdir build && cd build && \
+    cmake  .. && make -j$(nproc) && make install
+
+RUN cd /temp/ && \
     wget -O opencv.zip https://codeload.github.com/opencv/opencv/zip/refs/tags/4.6.0 && \
     unzip opencv.zip && cd opencv-4.6.0/ && \
     mkdir -p build && cd build && \
