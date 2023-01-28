@@ -38,3 +38,5 @@ COPY CMakeLists.txt ./
 RUN mkdir build && cd build && \
     cmake .. && \
     make -j$(nproc)
+
+RUN chmod +x tests/run_tests.sh
