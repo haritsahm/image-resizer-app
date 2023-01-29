@@ -35,6 +35,7 @@ public:
     {
         SUCCESS,
         FAILED,
+        UNKNOWN,
     };
 
     explicit Error(Code code = Code::SUCCESS) : code_(code) {}
