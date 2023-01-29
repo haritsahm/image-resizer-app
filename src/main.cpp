@@ -1,7 +1,5 @@
 #include <libasyik/service.hpp>
 #include <libasyik/http.hpp>
-#include <iostream>
-#include <typeinfo>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -9,26 +7,31 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
-#include <image_resizer/error.hpp>
+#include "image_resizer/error.hpp"
 #include "image_resizer/image_resizer.hpp"
 
+/// @brief Helper variable to store error code and reasoning
 typedef std::tuple<uint16_t, std::string> HTTP_CODE;
-uint16_t &getCode(const HTTP_CODE &code)
+uint16_t getCode(const HTTP_CODE &code)
 {
     return std::get<0>(code);
 }
 
-std::string &getReason(const HTTP_CODE &code)
+std::string getReason(const HTTP_CODE &code)
 {
     return std::get<1>(code);
 }
 
+/// @brief Validate incoming data request
+/// @param req_ptr ptr to http_request_ptr
+/// @param doc document to store data in json format
+/// @return HTTP_CODE code error and reasing
 HTTP_CODE validate_requests(const auto &req_ptr, rapidjson::Document &doc)
 {
 
     if (req_ptr->headers["Content-Type"] != "application/json")
     {
-        return std::make_tuple(415, "Content type error: payload must be defined as application/json");
+        return std::make_tuple(415, "Content-Type error: payload must be defined as application/json");
     }
 
     if (doc.Parse(req_ptr->body.c_str(), req_ptr->body.size()).HasParseError())
@@ -71,15 +74,15 @@ int main()
                             rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                             payload_result.Accept(writer);
 
+                            req->response.headers.set("Content-Type", "application/json");
+
                             val_code = validate_requests(req, payload_data);
                             if (getCode(val_code) != 200)
                             {
-                              req->response.headers.set("Content-Type", "application/json");
                               rapidjson::SetValueByPointer(payload_result, "/code", getCode(val_code));
-                              rapidjson::SetValueByPointer(payload_result, "/Message", getReason(code).c_str());
-                              req->response.result(getCode(val_code));
+                              rapidjson::SetValueByPointer(payload_result, "/Message", getReason(val_code).c_str());
                               req->response.body = buffer.GetString();
-
+                              req->response.result(getCode(val_code));
                             }
                             else
                             {
@@ -87,16 +90,15 @@ int main()
 
                               if (!proc_code.IsOk()) {
                                 rapidjson::SetValueByPointer(payload_result, "/code", 500);
-                                rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString());
-                                req->response.result(500);
+                                rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString().c_str());
                                 req->response.body = buffer.GetString();
+                                req->response.result(500);
                               }
                               else {
-                                rapidjson::SetValueByPointer(payload_result, "/code", 500);
+                                rapidjson::SetValueByPointer(payload_result, "/code", 200);
                                 rapidjson::SetValueByPointer(payload_result, "/message", "success");
 
                                 req->response.body = buffer.GetString();
-                                req->response.headers.set("Content-Type", "application/json");
                                 req->response.result(200);
                               }
                             } });
