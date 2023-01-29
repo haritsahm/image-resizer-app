@@ -22,6 +22,34 @@ RUN apt-get -y update && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
 
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh \
+    -q -O /tmp/cmake-install.sh \
+    && chmod u+x /tmp/cmake-install.sh \
+    && mkdir /opt/cmake-3.24.1 \
+    && /tmp/cmake-install.sh --skip-license --prefix=/opt/cmake-3.24.1 \
+    && rm /tmp/cmake-install.sh \
+    && ln -s /opt/cmake-3.24.1/bin/* /usr/local/bin
+
+RUN wget https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.gz && \
+    tar -zxvf boost_1_81_0.tar.gz && cd boost_1_81_0 && ./bootstrap.sh && ./b2 cxxflags="-std=c++$CXX_VERSION" \
+    --reconfigure --with-fiber --with-context --with-atomic --with-date_time --with-filesystem --with-url install && \
+    cd /temp/ && git clone -b v1.15 https://github.com/linux-test-project/lcov.git && cd lcov && make install
+
+RUN cd /temp/ && \
+    git clone https://github.com/okyfirmansyah/libasyik && \
+    cd libasyik/ && git checkout tags/0.9.5 && \
+    git submodule update --init --recursive && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DLIBASYIK_ENABLE_SOCI=OFF && \
+    make -j$(nproc) && \
+    make install
+
+RUN cd /temp/ && \
+    git clone https://github.com/Tencent/rapidjson.git && cd rapidjson/ && \
+    git submodule update --init && mkdir build && cd build && \
+    cmake  .. && make -j$(nproc) && make install
+
 RUN cd /temp/ && \
     wget -O opencv.zip https://codeload.github.com/opencv/opencv/zip/refs/tags/4.6.0 && \
     unzip opencv.zip && cd opencv-4.6.0/ && \

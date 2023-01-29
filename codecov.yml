@@ -1,0 +1,14 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        threshold: 1%
+    patch: off
+
+ignore:
+  src/error.cpp

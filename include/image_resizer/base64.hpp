@@ -8,7 +8,14 @@
 #include <string>
 #include <vector>
 
+/// @brief Decode encoded base64 string
+/// @param encoded_string string to decode
+/// @return Decoded string data
 std::string base64_decode(std::string const &encoded_string);
+
+/// @brief Encode raw string
+/// @param encoded_string string to encode
+/// @return Encoded string data
 std::string base64_encode(std::string const &s);
 
 #endif
