@@ -30,6 +30,8 @@ endif()
 
 find_package(OpenCV 4 REQUIRED)
 find_package(RapidJSON REQUIRED)
+find_package(Boost COMPONENTS context fiber date_time url REQUIRED)
+find_package(libasyik REQUIRED)
 
 include_directories(
     include
@@ -44,6 +46,12 @@ add_library(image_resizer
     src/image_resizer.cpp
 )
 
+add_executable(${PROJECT_NAME}
+    src/image_resizer_app.cpp
+)
+
+target_link_libraries(${PROJECT_NAME} common_utils image_resizer)
+
 if(OpenCV_FOUND)
     target_include_directories(image_resizer PUBLIC ${OpenCV_INCLUDE_DIR})
     target_link_libraries(image_resizer ${OpenCV_LIBS})
@@ -51,6 +59,16 @@ endif()
 
 if(RapidJSON_FOUND)
     target_include_directories(image_resizer PUBLIC ${RapidJSON_INCLUDE_DIRS})
+endif()
+
+if(Boost_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} Boost::fiber Boost::context Boost::date_time Boost::url)
+endif()
+
+if(libasyik_FOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${libasyik_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} libasyik)
 endif()
 
 if(RUN_TESTS)
