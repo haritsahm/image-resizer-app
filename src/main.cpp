@@ -60,7 +60,7 @@ HTTP_CODE validate_requests(const auto &req_ptr, rapidjson::Document &doc)
 int main()
 {
     auto as = asyik::make_service();
-    auto server = asyik::make_http_server(as, "127.0.0.1", 8080);
+    auto server = asyik::make_http_server(as, "0.0.0.0", 8080);
     server->set_request_body_limit(10485760); // 10MB
 
     std::shared_ptr<ImageResizer> image_resizer = std::make_shared<ImageResizer>();
@@ -72,7 +72,6 @@ int main()
                             rapidjson::Document payload_data, payload_result;
                             rapidjson::StringBuffer buffer; buffer.Clear();
                             rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                            payload_result.Accept(writer);
 
                             req->response.headers.set("Content-Type", "application/json");
 
@@ -81,6 +80,7 @@ int main()
                             {
                               rapidjson::SetValueByPointer(payload_result, "/code", getCode(val_code));
                               rapidjson::SetValueByPointer(payload_result, "/Message", getReason(val_code).c_str());
+                              payload_result.Accept(writer);
                               req->response.body = buffer.GetString();
                               req->response.result(getCode(val_code));
                             }
@@ -91,13 +91,14 @@ int main()
                               if (!proc_code.IsOk()) {
                                 rapidjson::SetValueByPointer(payload_result, "/code", 500);
                                 rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString().c_str());
+                                payload_result.Accept(writer);
                                 req->response.body = buffer.GetString();
                                 req->response.result(500);
                               }
                               else {
                                 rapidjson::SetValueByPointer(payload_result, "/code", 200);
                                 rapidjson::SetValueByPointer(payload_result, "/message", "success");
-
+                                payload_result.Accept(writer);
                                 req->response.body = buffer.GetString();
                                 req->response.result(200);
                               }
