@@ -91,15 +91,16 @@ TEST(APP, main_func)
                             rapidjson::Document payload_data, payload_result;
                             rapidjson::StringBuffer buffer; buffer.Clear();
                             rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                            payload_result.Accept(writer);
+
+                            req->response.headers.set("Content-Type", "application/json");
 
                             val_code = validate_requests(req, payload_data);
                             if (getCode(val_code) != 200)
                             {
                               rapidjson::SetValueByPointer(payload_result, "/code", getCode(val_code));
                               rapidjson::SetValueByPointer(payload_result, "/Message", getReason(val_code).c_str());
+                              payload_result.Accept(writer);
                               req->response.body = buffer.GetString();
-                              req->response.headers.set("Content-Type", "application/json");
                               req->response.result(getCode(val_code));
                             }
                             else
@@ -109,16 +110,15 @@ TEST(APP, main_func)
                               if (!proc_code.IsOk()) {
                                 rapidjson::SetValueByPointer(payload_result, "/code", 500);
                                 rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString().c_str());
+                                payload_result.Accept(writer);
                                 req->response.body = buffer.GetString();
-                                req->response.headers.set("Content-Type", "application/json");
                                 req->response.result(500);
                               }
                               else {
                                 rapidjson::SetValueByPointer(payload_result, "/code", 200);
                                 rapidjson::SetValueByPointer(payload_result, "/message", "success");
-
+                                payload_result.Accept(writer);
                                 req->response.body = buffer.GetString();
-                                req->response.headers.set("Content-Type", "application/json");
                                 req->response.result(200);
                               }
                             } });
@@ -219,6 +219,18 @@ TEST(APP, main_func)
 
         EXPECT_TRUE(req->response.result() == 200);
         EXPECT_TRUE(!req->response.headers["Content-Type"].compare("application/json"));
+
+        rapidjson::Document output_doc_test;
+        output_doc_test.Parse(req->response.body.c_str(), req->response.body.size());
+        EXPECT_TRUE(output_doc_test.HasMember("output_jpeg"));
+        EXPECT_TRUE(output_doc_test.HasMember("code"));
+        EXPECT_TRUE(output_doc_test["code"].GetInt() == 200);
+        EXPECT_TRUE(output_doc_test.HasMember("message"));
+        // EXPECT_TRUE(output_doc_test["message"].GetString() == "success");
+
+        std::string output_img_str_test(output_doc_test["output_jpeg"].GetString());
+        cv::Mat output_img_test = decode_image(output_img_str_test);
+        EXPECT_TRUE((output_img_test.size() == cv::Size{640, 480}));
 
         as->stop();
     });
