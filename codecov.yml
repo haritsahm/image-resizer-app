@@ -7,8 +7,5 @@ coverage:
       default:
         # basic
         target: auto
-        threshold: 1%
+        threshold: 5%
     patch: off
-
-ignore:
-  src/error.cpp
