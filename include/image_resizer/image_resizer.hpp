@@ -5,6 +5,10 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/pointer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include "image_resizer/base64.hpp"
 #include "image_resizer/error.hpp"
 
@@ -20,6 +24,7 @@ public:
     ImageResizer(ImageResizer &&obj) = delete;
     ImageResizer &operator=(ImageResizer &&obj);
 
+    Error process(const rapidjson::Document &encoded_input, rapidjson::Document &encoded_output);
     Error process(const std::string &encoded_input, std::string &encoded_output);
 
 private:

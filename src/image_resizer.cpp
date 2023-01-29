@@ -17,27 +17,67 @@ std::string ImageResizer::encode_image(const cv::Mat &image, const std::string &
     return encoded_img_str;
 }
 
-Error ImageResizer::process(const std::string &encoded_input, std::string &encoded_output)
+Error ImageResizer::process(const std::string &encoded_input_str, std::string &encoded_output_str)
+{
+    rapidjson::Document input_doc, output_doc;
+    if (input_doc.Parse(encoded_input_str.c_str(), encoded_input_str.size()).HasParseError())
+    {
+        return Error(Error::Code::FAILED, "Unable to parse input str to json.");
+    }
+
+    if (!input_doc.HasMember("input_jpeg"))
+    {
+        return Error(Error::Code::FAILED, "input_jpeg is not available in data.");
+    }
+
+    else if (!input_doc.HasMember("desired_width"))
+    {
+        return Error(Error::Code::FAILED, "desired_width is not available in data.");
+    }
+
+    else if (!input_doc.HasMember("desired_height"))
+    {
+        return Error(Error::Code::FAILED, "desired_height is not available in data.");
+    }
+
+    Error res = process(input_doc, output_doc);
+    if (!res.IsOk())
+    {
+        return res;
+    }
+
+    rapidjson ::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    output_doc.Accept(writer);
+    encoded_output_str = std::string(buffer.GetString());
+
+    return Error::Success;
+}
+
+Error ImageResizer::process(const rapidjson::Document &encoded_input_doc, rapidjson::Document &encoded_output_doc)
 {
     cv::Mat decoded_image;
     try
     {
-        decoded_image = decode_image(encoded_input);
+        std::string input_img_str(encoded_input_doc["input_jpeg"].GetString());
+        decoded_image = decode_image(input_img_str);
     }
     catch (const std::runtime_error &err)
     {
         return Error(Error::Code::FAILED, err.what());
     }
 
+    cv::Size resized_mat_size{encoded_input_doc["desired_width"].GetInt(), encoded_input_doc["desired_height"].GetInt()};
+
     if (decoded_image.empty())
         return Error(Error::Code::FAILED, "String input is not a valid image encoded data.");
 
-    cv::Size mat_size{1280, 720}; // dummy
-
     cv::Mat resized_image;
-    cv::resize(decoded_image, resized_image, mat_size, cv::INTER_NEAREST);
+    cv::resize(decoded_image, resized_image, resized_mat_size, cv::INTER_NEAREST);
 
-    encoded_output = encode_image(resized_image, ".jpg");
+    std::string encoded_image_str = encode_image(resized_image, ".jpg");
+
+    rapidjson::SetValueByPointer(encoded_output_doc, "/output_jpeg", encoded_image_str.c_str());
 
     return Error::Success;
 }
