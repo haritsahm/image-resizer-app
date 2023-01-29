@@ -38,20 +38,20 @@ HTTP_CODE validate_requests(const auto &req_ptr, rapidjson::Document &doc)
     {
         std::stringstream err;
         err << "JSON parse error: " << doc.GetParseError() << " - " << rapidjson::GetParseError_En(doc.GetParseError());
-        return std::make_tuple(415, err.str());
+        return std::make_tuple(422, err.str());
     }
 
     if (!doc.HasMember("input_jpeg"))
     {
-        return std::make_tuple(422, "input_jpeg is not available in data.");
+        return std::make_tuple(400, "input_jpeg is not available in data.");
     }
     else if (!doc.HasMember("desired_width"))
     {
-        return std::make_tuple(422, "desired_width is not available in data.");
+        return std::make_tuple(400, "desired_width is not available in data.");
     }
     else if (!doc.HasMember("desired_height"))
     {
-        return std::make_tuple(422, "desired_height is not available in data.");
+        return std::make_tuple(400, "desired_height is not available in data.");
     }
 
     return std::make_tuple(200, "");
@@ -88,19 +88,19 @@ int main()
                             {
                               Error proc_code = image_resizer->process(payload_data, payload_result);
 
-                              if (!proc_code.IsOk()) {
-                                rapidjson::SetValueByPointer(payload_result, "/code", 500);
-                                rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString().c_str());
-                                payload_result.Accept(writer);
-                                req->response.body = buffer.GetString();
-                                req->response.result(500);
-                              }
-                              else {
+                              if (proc_code.IsOk()) {
                                 rapidjson::SetValueByPointer(payload_result, "/code", 200);
                                 rapidjson::SetValueByPointer(payload_result, "/message", "success");
                                 payload_result.Accept(writer);
                                 req->response.body = buffer.GetString();
                                 req->response.result(200);
+                              }
+                              else {
+                                rapidjson::SetValueByPointer(payload_result, "/code", 500);
+                                rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString().c_str());
+                                payload_result.Accept(writer);
+                                req->response.body = buffer.GetString();
+                                req->response.result(500);
                               }
                             } });
 

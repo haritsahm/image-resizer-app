@@ -50,27 +50,27 @@ HTTP_CODE validate_requests(const auto &req_ptr, rapidjson::Document &doc)
 
     if (req_ptr->headers["Content-Type"] != "application/json")
     {
-        return std::make_tuple(415, "Content-Type Error: payload must be defined as application/json");
+        return std::make_tuple(415, "Content-Type error: payload must be defined as application/json");
     }
 
-    if (doc.Parse(req_ptr->body.c_str(), req_ptr->body.size()).HasParseError())
+    else if (doc.Parse(req_ptr->body.c_str(), req_ptr->body.size()).HasParseError())
     {
         std::stringstream err;
         err << "JSON parse error: " << doc.GetParseError() << " - " << rapidjson::GetParseError_En(doc.GetParseError());
-        return std::make_tuple(415, err.str());
+        return std::make_tuple(422, err.str());
     }
 
-    if (!doc.HasMember("input_jpeg"))
+    else if (!doc.HasMember("input_jpeg"))
     {
-        return std::make_tuple(422, "input_jpeg is not available in data.");
+        return std::make_tuple(400, "input_jpeg is not available in data.");
     }
     else if (!doc.HasMember("desired_width"))
     {
-        return std::make_tuple(422, "desired_width is not available in data.");
+        return std::make_tuple(400, "desired_width is not available in data.");
     }
     else if (!doc.HasMember("desired_height"))
     {
-        return std::make_tuple(422, "desired_height is not available in data.");
+        return std::make_tuple(400, "desired_height is not available in data.");
     }
 
     return std::make_tuple(200, "");
@@ -135,6 +135,16 @@ TEST(APP, main_func)
             "{\"code\":415,\"Message\":\"Content-Type error: payload must be defined as application/json"));
         EXPECT_TRUE(!req->response.headers["Content-Type"].compare("application/json"));
 
+        req =
+            asyik::http_easy_request(as, "POST", "http://127.0.0.1:8080/resize_image",
+                                            "{[\"desired_height\":[]}",
+                                            {
+                                                {"Content-Type", "application/json"}  //headers
+                                            });
+
+        EXPECT_TRUE(req->response.result() == 422);
+        EXPECT_TRUE(!req->response.headers["Content-Type"].compare("application/json"));
+
         req = asyik::http_easy_request(
             as, "POST", "http://127.0.0.1:8080/resize_image",
             "{\"desired_height\":[]}",
@@ -142,7 +152,7 @@ TEST(APP, main_func)
                 {"Content-Type", "application/json"}  //headers
             });
 
-        EXPECT_TRUE(req->response.result() == 422);
+        EXPECT_TRUE(req->response.result() == 400);
         EXPECT_TRUE(req->response.body.compare(
             "{\"code\":415,\"Message\":\"input_jpeg is not available in data."));
         EXPECT_TRUE(!req->response.headers["Content-Type"].compare("application/json"));
@@ -154,7 +164,7 @@ TEST(APP, main_func)
                 {"Content-Type", "application/json"}  //headers
             });
 
-        EXPECT_TRUE(req->response.result() == 422);
+        EXPECT_TRUE(req->response.result() == 400);
         EXPECT_TRUE(req->response.body.compare(
             "{\"code\":415,\"Message\":\"desired_width is not available in data."));
         EXPECT_TRUE(!req->response.headers["Content-Type"].compare("application/json"));
@@ -166,7 +176,7 @@ TEST(APP, main_func)
                 {"Content-Type", "application/json"}  //headers
             });
 
-        EXPECT_TRUE(req->response.result() == 422);
+        EXPECT_TRUE(req->response.result() == 400);
         EXPECT_TRUE(req->response.body.compare(
             "{\"code\":415,\"Message\":\"desired_height is not available in data."));
         EXPECT_TRUE(!req->response.headers["Content-Type"].compare("application/json"));
@@ -226,7 +236,7 @@ TEST(APP, main_func)
         EXPECT_TRUE(output_doc_test.HasMember("code"));
         EXPECT_TRUE(output_doc_test["code"].GetInt() == 200);
         EXPECT_TRUE(output_doc_test.HasMember("message"));
-        // EXPECT_TRUE(output_doc_test["message"].GetString() == "success");
+        EXPECT_STREQ(output_doc_test["message"].GetString(), "success");
 
         std::string output_img_str_test(output_doc_test["output_jpeg"].GetString());
         cv::Mat output_img_test = decode_image(output_img_str_test);

@@ -9,6 +9,15 @@ FetchContent_MakeAvailable(googletest)
 add_library(GTest::GTest INTERFACE IMPORTED)
 target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
+add_executable(test_error_class
+    test-basic-base64.cpp
+)
+target_link_libraries(test_error_class
+    PRIVATE
+    GTest::GTest
+    common_utils
+)
+
 add_executable(test_basic_base64
     test-basic-base64.cpp
 )
@@ -50,6 +59,7 @@ target_link_libraries(test_app
     libasyik)
 target_include_directories(test_app PRIVATE ${RapidJSON_INCLUDE_DIRS} ${libasyik_INCLUDE_DIR})
 
+add_test(NAME test_error_class COMMAND $<TARGET_FILE:test_error_class>)
 add_test(NAME test_basic_base64 COMMAND $<TARGET_FILE:test_basic_base64>)
 add_test(NAME test_image_resizer COMMAND $<TARGET_FILE:test_image_resizer>)
 add_test(NAME test_rapid_json COMMAND $<TARGET_FILE:test_rapid_json>)
