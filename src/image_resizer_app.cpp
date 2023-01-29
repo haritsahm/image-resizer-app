@@ -67,28 +67,32 @@ int main()
                             {
                             HTTP_CODE val_code;
                             rapidjson::Document payload_data, payload_result;
+                            rapidjson::StringBuffer buffer; buffer.Clear();
+                            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                            payload_result.Accept(writer);
 
                             val_code = validate_requests(req, payload_data);
                             if (getCode(val_code) != 200)
                             {
                               req->response.headers.set("Content-Type", "application/json");
+                              rapidjson::SetValueByPointer(payload_result, "/code", getCode(val_code));
+                              rapidjson::SetValueByPointer(payload_result, "/Message", getReason(code).c_str());
                               req->response.result(getCode(val_code));
+                              req->response.body = buffer.GetString();
+
                             }
                             else
                             {
                               Error proc_code = image_resizer->process(payload_data, payload_result);
-                              rapidjson::StringBuffer buffer; buffer.Clear();
-                              rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                              payload_result.Accept(writer);
 
                               if (!proc_code.IsOk()) {
-                                rapidjson::SetValueByPointer(payload_result, "/code", 422);
+                                rapidjson::SetValueByPointer(payload_result, "/code", 500);
                                 rapidjson::SetValueByPointer(payload_result, "/Message", proc_code.AsString());
-                                req->response.result(422);
+                                req->response.result(500);
                                 req->response.body = buffer.GetString();
                               }
                               else {
-                                rapidjson::SetValueByPointer(payload_result, "/code", 200);
+                                rapidjson::SetValueByPointer(payload_result, "/code", 500);
                                 rapidjson::SetValueByPointer(payload_result, "/message", "success");
 
                                 req->response.body = buffer.GetString();
