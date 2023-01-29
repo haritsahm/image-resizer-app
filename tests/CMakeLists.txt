@@ -38,6 +38,19 @@ target_link_libraries(test_rapid_json
     common_utils)
 target_include_directories(test_rapid_json PRIVATE ${RapidJSON_INCLUDE_DIRS})
 
+add_executable(test_app
+    test-app.cpp
+)
+
+target_link_libraries(test_app
+    PRIVATE
+    GTest::GTest
+    common_utils
+    image_resizer
+    libasyik)
+target_include_directories(test_app PRIVATE ${RapidJSON_INCLUDE_DIRS} ${libasyik_INCLUDE_DIR})
+
 add_test(NAME test_basic_base64 COMMAND $<TARGET_FILE:test_basic_base64>)
 add_test(NAME test_image_resizer COMMAND $<TARGET_FILE:test_image_resizer>)
 add_test(NAME test_rapid_json COMMAND $<TARGET_FILE:test_rapid_json>)
+add_test(NAME test_app COMMAND $<TARGET_FILE:test_app>)

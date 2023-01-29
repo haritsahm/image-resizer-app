@@ -47,9 +47,10 @@ add_library(image_resizer
 )
 
 add_executable(${PROJECT_NAME}
-    src/image_resizer_app.cpp
+    src/main.cpp
 )
 
+target_link_libraries(image_resizer common_utils)
 target_link_libraries(${PROJECT_NAME} common_utils image_resizer)
 
 if(OpenCV_FOUND)
@@ -59,12 +60,19 @@ endif()
 
 if(RapidJSON_FOUND)
     target_include_directories(image_resizer PUBLIC ${RapidJSON_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 endif()
 
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} Boost::fiber Boost::context Boost::date_time Boost::url)
 endif()
+
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} Threads::Threads)
+
+find_package(OpenSSL REQUIRED)
+target_link_libraries(${PROJECT_NAME} OpenSSL::SSL)
 
 if(libasyik_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${libasyik_INCLUDE_DIR})
