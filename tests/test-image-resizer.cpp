@@ -76,6 +76,12 @@ TEST(ImageResizerFunc, resizer_class_proc_str)
     ImageResizer image_resizer_obj;
     cv::Size mat_size{1280, 720};
 
+    std::string input_str_test{"{[\"foo\":[123]}"};
+    std::string output_str_test;
+    Error res_test = image_resizer_obj.process(input_str_test, output_str_test);
+    EXPECT_EQ(res_test, Error(Error::Code::FAILED));
+    EXPECT_STREQ(res_test.Message().c_str(), "Unable to parse input str to json.");
+
     std::string input_str_test1{"{\"foo\":[123]}"};
     std::string output_str_test1;
     Error res_test1 = image_resizer_obj.process(input_str_test1, output_str_test1);
